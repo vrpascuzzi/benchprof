@@ -58,7 +58,7 @@ done;
 template <typename Type>
 __global__ void range_transform(std::uint64_t n, Type *devData, Type a,
                                 Type b) {
-  int tid = hipThreadIdx.x + hipBlockIdx.x * hipBlockDim.x;
+  int tid = threadIdx.x + blockIdx.x * blockDim.x;
   if (tid < n) {
     devData[tid] = devData[tid] * (b - a) + a;
   }
@@ -67,7 +67,7 @@ __global__ void range_transform(std::uint64_t n, Type *devData, Type a,
 template <typename Type>
 __global__ void range_transform_int(std::uint64_t n, std::uint32_t *uniformData,
                                     Type *devData, Type a, Type b) {
-  int tid = hipThreadIdx.x + hipBlockIdx.x * hipBlockDim.x;
+  int tid = threadIdx.x + blockIdx.x * blockDim.x;
   if (tid < n) {
     devData[tid] = a + uniformData[tid] % (b - a);
   }
