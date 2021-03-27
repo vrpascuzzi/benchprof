@@ -13,7 +13,7 @@
    -fsycl -lonemkl -DSYCL_TARGET_GPU=ON test_mkl_rng.cc \
    -o test_mkl_gpu.exe
    */
-  /*
+/*
 rm timing_curand_tpb512.csv ; \
 for size in 1 10 100 10000 100000 1000000 10000000 100000000; do \
 for name in "uniform_float" "uniform_double" "uniform_float_accurate" \
@@ -42,26 +42,25 @@ done; \
 done;
 */
 
+#include <math.h>
+#include <unistd.h>
+
+#include <CL/sycl.hpp>
 #include <chrono>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
-#include <math.h>
-#include <unistd.h>
+#include <oneapi/mkl.hpp>
 #include <vector>
 
-
-#include <CL/sycl.hpp>
-#include <oneapi/mkl.hpp>
-
-#define UNIFORM_ARGS_FLOAT  -1.0f, 5.0f
+#define UNIFORM_ARGS_FLOAT -1.0f, 5.0f
 #define UNIFORM_ARGS_DOUBLE -1.0, 5.0
-#define UNIFORM_ARGS_INT    -1, 5
+#define UNIFORM_ARGS_INT -1, 5
 
-#define GAUSSIAN_ARGS_FLOAT  -1.0f, 5.0f
+#define GAUSSIAN_ARGS_FLOAT -1.0f, 5.0f
 #define GAUSSIAN_ARGS_DOUBLE -1.0, 5.0
 
-#define LOGNORMAL_ARGS_FLOAT  -1.0f, 5.0f, 1.0f, 2.0f
+#define LOGNORMAL_ARGS_FLOAT -1.0f, 5.0f, 1.0f, 2.0f
 #define LOGNORMAL_ARGS_DOUBLE -1.0, 5.0, 1.0, 2.0
 
 #define BERNOULLI_ARGS 0.5f
@@ -78,10 +77,12 @@ done;
 class CUDASelector : public cl::sycl::device_selector {
  public:
   int operator()(const cl::sycl::device& device) const override {
-    const std::string device_vendor = device.get_info<cl::sycl::info::device::vendor>();
+    const std::string device_vendor =
+        device.get_info<cl::sycl::info::device::vendor>();
     const std::string device_driver =
         device.get_info<cl::sycl::info::device::driver_version>();
-    const std::string device_name = device.get_info<cl::sycl::info::device::name>();
+    const std::string device_name =
+        device.get_info<cl::sycl::info::device::name>();
 
     if (device.is_gpu() &&
         (device_vendor.find("NVIDIA") != std::string::npos) &&
@@ -97,10 +98,12 @@ class CUDASelector : public cl::sycl::device_selector {
 class AMDSelector : public cl::sycl::device_selector {
  public:
   int operator()(const cl::sycl::device& device) const override {
-    const std::string device_vendor = device.get_info<cl::sycl::info::device::vendor>();
+    const std::string device_vendor =
+        device.get_info<cl::sycl::info::device::vendor>();
     const std::string device_driver =
         device.get_info<cl::sycl::info::device::driver_version>();
-    const std::string device_name = device.get_info<cl::sycl::info::device::name>();
+    const std::string device_name =
+        device.get_info<cl::sycl::info::device::name>();
 
     if (device.is_gpu() && (device_vendor.find("AMD") != std::string::npos)) {
       return 1;
@@ -138,9 +141,9 @@ static inline cl::sycl::device GetTargetDevice() {
   return dev;
 }
 
-template<typename Engine, typename Distr, typename... Args>
-void test_rng(std::string name, cl::sycl::queue queue, size_t n_iters, std::int64_t n_points,
-              Args... args) {
+template <typename Engine, typename Distr, typename... Args>
+void test_rng(std::string name, cl::sycl::queue queue, size_t n_iters,
+              std::int64_t n_points, Args... args) {
   using Type = typename Distr::result_type;
 
   // Clocks
@@ -159,29 +162,28 @@ void test_rng(std::string name, cl::sycl::queue queue, size_t n_iters, std::int6
   double tot_stddev = 0.0;
   double kernel_stddev = 0.0;
 
-
   for (unsigned int i = 0; i < n_iters; ++i) {
     start_tot = std::chrono::high_resolution_clock::now();
 #ifdef SYCL_USE_USM
-  // Create usm allocator
+    // Create usm allocator
 #ifdef USE_RT_API
-  cl::sycl::usm_allocator<Type, cl::sycl::usm::alloc::shared, 64>
-    allocator(queue);
+    cl::sycl::usm_allocator<Type, cl::sycl::usm::alloc::shared, 64> allocator(
+        queue);
 #else
-  cl::sycl::usm_allocator<Type, cl::sycl::usm::alloc::shared, 64>
-    allocator(queue.get_context(), queue.get_device());
+    cl::sycl::usm_allocator<Type, cl::sycl::usm::alloc::shared, 64> allocator(
+        queue.get_context(), queue.get_device());
 #endif
 
-  // Allocate storage for random numbers
-  std::vector<Type, decltype(allocator)> x(n_points, allocator);
+    // Allocate storage for random numbers
+    std::vector<Type, decltype(allocator)> x(n_points, allocator);
 #else
-  cl::sycl::buffer<Type, 1> x(n_points);
+    cl::sycl::buffer<Type, 1> x(n_points);
 #endif
 
-  try {
-    // Generator initialization
-    Engine engine(queue, SEED);
-    Distr distr(args...);
+    try {
+      // Generator initialization
+      Engine engine(queue, SEED);
+      Distr distr(args...);
 
       start_kernel = std::chrono::high_resolution_clock::now();
 #ifdef SYCL_USE_USM
@@ -194,18 +196,18 @@ void test_rng(std::string name, cl::sycl::queue queue, size_t n_iters, std::int6
       end = std::chrono::high_resolution_clock::now();
       kernel_times_vec.push_back(end - start_kernel);
     } catch (cl::sycl::exception const& e) {
-    std::cout << "\t\tSYCL exception \n" << e.what() << std::endl;
-  }
+      std::cout << "\t\tSYCL exception \n" << e.what() << std::endl;
+    }
 
-  // Print first few numbers
+    // Print first few numbers
 #ifndef SYCL_USE_USM
-  auto acc = x.template get_access<cl::sycl::access::mode::read>();
+    auto acc = x.template get_access<cl::sycl::access::mode::read>();
 #endif
-  //for (size_t i = 0; i < 10; ++i) {
-  //  std::cout << acc[i] << std::endl;
-  //}
-      end_tot = std::chrono::high_resolution_clock::now();
-      times_vec.push_back(end_tot - start_tot);
+    // for (size_t i = 0; i < 10; ++i) {
+    //  std::cout << acc[i] << std::endl;
+    //}
+    end_tot = std::chrono::high_resolution_clock::now();
+    times_vec.push_back(end_tot - start_tot);
   }
 
   // Get timings
@@ -226,28 +228,25 @@ void test_rng(std::string name, cl::sycl::queue queue, size_t n_iters, std::int6
 
   var = 0.0;
   for (auto t : kernel_times_vec) {
-    var += (t.count() - kernel_mean_time.count()) * (t.count() - kernel_mean_time.count());
+    var += (t.count() - kernel_mean_time.count()) *
+           (t.count() - kernel_mean_time.count());
   }
   var /= sizeof(kernel_times_vec);
   kernel_stddev = std::sqrt(var);
   // Print
-  std::cout << name << ","
-           << n_iters << ","
-           << n_points << ","
-           << tot_time.count() << ","
-           << mean_time.count() << ","
-           << tot_stddev << ","
-           << kernel_tot_time.count() << ","
-           << kernel_mean_time.count() << ","
-           << kernel_stddev << std::endl;
+  std::cout << name << "," << n_iters << "," << n_points << ","
+            << tot_time.count() << "," << mean_time.count() << "," << tot_stddev
+            << "," << kernel_tot_time.count() << "," << kernel_mean_time.count()
+            << "," << kernel_stddev << std::endl;
 }
 
 int main(int argc, char** argv) {
-    if (argc != 4) {
-        std::cout << "useage: test_mkl_rng.exe <num_batches> <batch_size> <distr_type>\n";
-        return 0;
-    }
-    
+  if (argc != 4) {
+    std::cout
+        << "useage: test_mkl_rng.exe <num_batches> <batch_size> <distr_type>\n";
+    return 0;
+  }
+
   size_t n_iters = atoi(argv[1]);
   size_t n_points = atoi(argv[2]);
   std::string name = std::string(argv[3]);
@@ -266,10 +265,10 @@ int main(int argc, char** argv) {
   // Choose device to run on and create queue
   cl::sycl::device dev = GetTargetDevice();
   cl::sycl::queue queue(dev, exception_handler);
-  std::string device_name = 
-    queue.get_device().get_info<cl::sycl::info::device::name>();
-    // std::cout << "dev_name: " << device_name << std::endl;
-  
+  std::string device_name =
+      queue.get_device().get_info<cl::sycl::info::device::name>();
+  // std::cout << "dev_name: " << device_name << std::endl;
+
   // Initialize output file
   std::string device_type;
   if (std::string(argv[0]).find("cpu") != std::string::npos) {
@@ -283,46 +282,58 @@ int main(int argc, char** argv) {
     return 0;
   }
 
-  #ifdef USE_PHILOX
+#ifdef USE_PHILOX
   using engine = oneapi::mkl::rng::philox4x32x10;
-  #elif defined USE_MRG
+#elif defined USE_MRG
   using engine = oneapi::mkl::rng::mrg32k3a;
-  #endif
+#endif
 
   if (name == "uniform_float") {
     std::string name = "uniform_float";
-    test_rng<engine,
-            oneapi::mkl::rng::uniform<
-              float, oneapi::mkl::rng::uniform_method::standard>>(name, queue, n_iters, n_points, UNIFORM_ARGS_FLOAT);
+    test_rng<engine, oneapi::mkl::rng::uniform<
+                         float, oneapi::mkl::rng::uniform_method::standard>>(
+        name, queue, n_iters, n_points, UNIFORM_ARGS_FLOAT);
   } else if (name == "uniform_double") {
     test_rng<oneapi::mkl::rng::philox4x32x10,
-            oneapi::mkl::rng::uniform<
-              double, oneapi::mkl::rng::uniform_method::standard>>(name, queue, n_iters, n_points, UNIFORM_ARGS_DOUBLE);
+             oneapi::mkl::rng::uniform<
+                 double, oneapi::mkl::rng::uniform_method::standard>>(
+        name, queue, n_iters, n_points, UNIFORM_ARGS_DOUBLE);
   } else if (name == "uniform_int") {
     test_rng<oneapi::mkl::rng::philox4x32x10,
-            oneapi::mkl::rng::uniform<
-              std::int32_t, oneapi::mkl::rng::uniform_method::standard>>(name, queue, n_iters, n_points, UNIFORM_ARGS_DOUBLE);
+             oneapi::mkl::rng::uniform<
+                 std::int32_t, oneapi::mkl::rng::uniform_method::standard>>(
+        name, queue, n_iters, n_points, UNIFORM_ARGS_DOUBLE);
   } else if (name == "uniform_float_accurate") {
-  test_rng<oneapi::mkl::rng::philox4x32x10,
-           oneapi::mkl::rng::uniform<float, oneapi::mkl::rng::uniform_method::accurate>>(name, queue, n_iters, n_points, UNIFORM_ARGS_FLOAT);
+    test_rng<oneapi::mkl::rng::philox4x32x10,
+             oneapi::mkl::rng::uniform<
+                 float, oneapi::mkl::rng::uniform_method::accurate>>(
+        name, queue, n_iters, n_points, UNIFORM_ARGS_FLOAT);
   } else if (name == "uniform_double_accurate") {
-  test_rng<oneapi::mkl::rng::philox4x32x10,
-           oneapi::mkl::rng::uniform<double, oneapi::mkl::rng::uniform_method::accurate>>(name, queue, n_iters, n_points, UNIFORM_ARGS_DOUBLE);
+    test_rng<oneapi::mkl::rng::philox4x32x10,
+             oneapi::mkl::rng::uniform<
+                 double, oneapi::mkl::rng::uniform_method::accurate>>(
+        name, queue, n_iters, n_points, UNIFORM_ARGS_DOUBLE);
   } else if (name == "gaussian_float") {
-  test_rng<oneapi::mkl::rng::philox4x32x10,
-            oneapi::mkl::rng::gaussian<
-            float, oneapi::mkl::rng::gaussian_method::box_muller2>>(name, queue, n_iters, n_points, GAUSSIAN_ARGS_FLOAT);
+    test_rng<oneapi::mkl::rng::philox4x32x10,
+             oneapi::mkl::rng::gaussian<
+                 float, oneapi::mkl::rng::gaussian_method::box_muller2>>(
+        name, queue, n_iters, n_points, GAUSSIAN_ARGS_FLOAT);
   } else if (name == "gaussian_double") {
-  test_rng<oneapi::mkl::rng::philox4x32x10,
-            oneapi::mkl::rng::gaussian<double, oneapi::mkl::rng::gaussian_method::box_muller2>>(name, queue, n_iters, n_points, GAUSSIAN_ARGS_DOUBLE);
+    test_rng<oneapi::mkl::rng::philox4x32x10,
+             oneapi::mkl::rng::gaussian<
+                 double, oneapi::mkl::rng::gaussian_method::box_muller2>>(
+        name, queue, n_iters, n_points, GAUSSIAN_ARGS_DOUBLE);
   } else if (name == "lognormal_float") {
-  test_rng<oneapi::mkl::rng::philox4x32x10,
-            oneapi::mkl::rng::lognormal<float, oneapi::mkl::rng::lognormal_method::box_muller2>>(name, queue, n_iters, n_points, LOGNORMAL_ARGS_FLOAT);
-} else if (name == "bits_int") {
-  test_rng<oneapi::mkl::rng::philox4x32x10,
-            oneapi::mkl::rng::bits<std::uint32_t>>(name, queue, n_iters, n_points);
-} else{
-  std::cout << "invalid distr_type\n";
-}
+    test_rng<oneapi::mkl::rng::philox4x32x10,
+             oneapi::mkl::rng::lognormal<
+                 float, oneapi::mkl::rng::lognormal_method::box_muller2>>(
+        name, queue, n_iters, n_points, LOGNORMAL_ARGS_FLOAT);
+  } else if (name == "bits_int") {
+    test_rng<oneapi::mkl::rng::philox4x32x10,
+             oneapi::mkl::rng::bits<std::uint32_t>>(name, queue, n_iters,
+                                                    n_points);
+  } else {
+    std::cout << "invalid distr_type\n";
+  }
   return 0;
 }

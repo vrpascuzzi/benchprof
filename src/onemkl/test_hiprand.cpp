@@ -116,18 +116,18 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
       /* Allocate n floats on host */
       hostData = (Type *)calloc(n_points, sizeof(Type));
       /* Allocate n floats on device */
-      HIP_CALL(cudaMalloc((void **)&devData, n_points * sizeof(Type)));
+      HIP_CALL(hipMalloc((void **)&devData, n_points * sizeof(Type)));
       start_kernel = std::chrono::high_resolution_clock::now();
       HIPRAND_CALL(hiprandGenerateUniform(gen, devData, n_points));
       range_transform<Type><<<nblocks, THREADS_PER_BLOCK>>>(n_points, devData,
                                                             UNIFORM_ARGS_FLOAT);
-      cudaError_t status = cudaDeviceSynchronize();
+      hipError_t status = hipDeviceSynchronize();
       end_kernel = std::chrono::high_resolution_clock::now();
       kernel_times_vec.push_back(end_kernel - start_kernel);
 
       /* Copy device memory to host */
-      HIP_CALL(cudaMemcpy(hostData, devData, n_points * sizeof(float),
-                           cudaMemcpyDeviceToHost));
+      HIP_CALL(hipMemcpy(hostData, devData, n_points * sizeof(float),
+                           hipMemcpyDeviceToHost));
 
       /* Show result */
       // for(unsigned int i = 0; i < 10; i++) {
@@ -136,7 +136,7 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
       // printf("\n");
 
       /* Cleanup */
-      HIP_CALL(cudaFree(devData));
+      HIP_CALL(hipFree(devData));
       free(hostData);
       end_tot = std::chrono::high_resolution_clock::now();
       times_vec.push_back(end_tot - start_tot);
@@ -168,19 +168,19 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
       /* Allocate n floats on host */
       hostData = (Type *)calloc(n_points, sizeof(Type));
       /* Allocate n floats on device */
-      HIP_CALL(cudaMalloc((void **)&devData, n_points * sizeof(Type)));
+      HIP_CALL(hipMalloc((void **)&devData, n_points * sizeof(Type)));
       start_kernel = std::chrono::high_resolution_clock::now();
       HIPRAND_CALL(hiprandGenerateUniformDouble(gen, devData, n_points));
-      // cudaDeviceSynchronize();
+      // hipDeviceSynchronize();
       range_transform<Type><<<nblocks, THREADS_PER_BLOCK>>>(
           n_points, devData, UNIFORM_ARGS_DOUBLE);
-      cudaError_t status = cudaDeviceSynchronize();
+      hipError_t status = hipDeviceSynchronize();
       end_kernel = std::chrono::high_resolution_clock::now();
       kernel_times_vec.push_back(end_kernel - start_kernel);
 
       /* Copy device memory to host */
-      HIP_CALL(cudaMemcpy(hostData, devData, n_points * sizeof(float),
-                           cudaMemcpyDeviceToHost));
+      HIP_CALL(hipMemcpy(hostData, devData, n_points * sizeof(float),
+                           hipMemcpyDeviceToHost));
 
       /* Show result */
       // for(unsigned int i = 0; i < 10; i++) {
@@ -189,7 +189,7 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
       // printf("\n");
 
       /* Cleanup */
-      HIP_CALL(cudaFree(devData));
+      HIP_CALL(hipFree(devData));
       free(hostData);
       HIPRAND_CALL(hiprandDestroyGenerator(gen));
       end_tot = std::chrono::high_resolution_clock::now();
@@ -219,18 +219,18 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
       /* Allocate n floats on host */
       hostData = (Type *)calloc(n_points, sizeof(Type));
       /* Allocate n floats on device */
-      HIP_CALL(cudaMalloc((void **)&devData, n_points * sizeof(Type)));
+      HIP_CALL(hipMalloc((void **)&devData, n_points * sizeof(Type)));
       start_kernel = std::chrono::high_resolution_clock::now();
       HIPRAND_CALL(
           hiprandGenerateNormal(gen, devData, n_points, GAUSSIAN_ARGS_FLOAT));
-      // cudaDeviceSynchronize();
-      cudaError_t status = cudaDeviceSynchronize();
+      // hipDeviceSynchronize();
+      hipError_t status = hipDeviceSynchronize();
       end_kernel = std::chrono::high_resolution_clock::now();
       kernel_times_vec.push_back(end_kernel - start_kernel);
 
       /* Copy device memory to host */
-      HIP_CALL(cudaMemcpy(hostData, devData, n_points * sizeof(float),
-                           cudaMemcpyDeviceToHost));
+      HIP_CALL(hipMemcpy(hostData, devData, n_points * sizeof(float),
+                           hipMemcpyDeviceToHost));
 
       /* Show result */
       // for(unsigned int i = 0; i < 10; i++) {
@@ -239,7 +239,7 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
       // printf("\n");
 
       /* Cleanup */
-      HIP_CALL(cudaFree(devData));
+      HIP_CALL(hipFree(devData));
       free(hostData);
       end_tot = std::chrono::high_resolution_clock::now();
       times_vec.push_back(end_tot - start_tot);
@@ -269,18 +269,18 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
       /* Allocate n floats on host */
       hostData = (Type *)calloc(n_points, sizeof(Type));
       /* Allocate n floats on device */
-      HIP_CALL(cudaMalloc((void **)&devData, n_points * sizeof(Type)));
+      HIP_CALL(hipMalloc((void **)&devData, n_points * sizeof(Type)));
       start_kernel = std::chrono::high_resolution_clock::now();
       HIPRAND_CALL(hiprandGenerateNormalDouble(gen, devData, n_points,
                                              GAUSSIAN_ARGS_DOUBLE));
-      // cudaDeviceSynchronize();
-      cudaError_t status = cudaDeviceSynchronize();
+      // hipDeviceSynchronize();
+      hipError_t status = hipDeviceSynchronize();
       end_kernel = std::chrono::high_resolution_clock::now();
       kernel_times_vec.push_back(end_kernel - start_kernel);
 
       /* Copy device memory to host */
-      HIP_CALL(cudaMemcpy(hostData, devData, n_points * sizeof(float),
-                           cudaMemcpyDeviceToHost));
+      HIP_CALL(hipMemcpy(hostData, devData, n_points * sizeof(float),
+                           hipMemcpyDeviceToHost));
 
       /* Show result */
       // for(unsigned int i = 0; i < 10; i++) {
@@ -289,7 +289,7 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
       // printf("\n");
 
       /* Cleanup */
-      HIP_CALL(cudaFree(devData));
+      HIP_CALL(hipFree(devData));
       free(hostData);
       end_tot = std::chrono::high_resolution_clock::now();
       times_vec.push_back(end_tot - start_tot);
@@ -321,18 +321,18 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
       /* Allocate n floats on host */
       hostData = (Type *)calloc(n_points, sizeof(Type));
       /* Allocate n floats on device */
-      HIP_CALL(cudaMalloc((void **)&devData, n_points * sizeof(Type)));
+      HIP_CALL(hipMalloc((void **)&devData, n_points * sizeof(Type)));
       start_kernel = std::chrono::high_resolution_clock::now();
       HIPRAND_CALL(hiprandGenerateLogNormal(gen, devData, n_points, 0.0f, 1.0f));
       range_transform<Type>
           <<<nblocks, THREADS_PER_BLOCK>>>(n_points, devData, -1.0f, 5.0f);
-      cudaError_t status = cudaDeviceSynchronize();
+      hipError_t status = hipDeviceSynchronize();
       end_kernel = std::chrono::high_resolution_clock::now();
       kernel_times_vec.push_back(end_kernel - start_kernel);
 
       /* Copy device memory to host */
-      HIP_CALL(cudaMemcpy(hostData, devData, n_points * sizeof(float),
-                           cudaMemcpyDeviceToHost));
+      HIP_CALL(hipMemcpy(hostData, devData, n_points * sizeof(float),
+                           hipMemcpyDeviceToHost));
 
       /* Show result */
       // for(unsigned int i = 0; i < 10; i++) {
@@ -341,7 +341,7 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
       // printf("\n");
 
       /* Cleanup */
-      HIP_CALL(cudaFree(devData));
+      HIP_CALL(hipFree(devData));
       free(hostData);
       end_tot = std::chrono::high_resolution_clock::now();
       times_vec.push_back(end_tot - start_tot);
@@ -371,16 +371,16 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
       /* Allocate n floats on host */
       hostData = (Type *)calloc(n_points, sizeof(Type));
       /* Allocate n floats on device */
-      HIP_CALL(cudaMalloc((void **)&devData, n_points * sizeof(Type)));
+      HIP_CALL(hipMalloc((void **)&devData, n_points * sizeof(Type)));
       start_kernel = std::chrono::high_resolution_clock::now();
       HIPRAND_CALL(hiprandGenerate(gen, devData, n_points));
-      cudaError_t status = cudaDeviceSynchronize();
+      hipError_t status = hipDeviceSynchronize();
       end_kernel = std::chrono::high_resolution_clock::now();
       kernel_times_vec.push_back(end_kernel - start_kernel);
 
       /* Copy device memory to host */
-      HIP_CALL(cudaMemcpy(hostData, devData, n_points * sizeof(float),
-                           cudaMemcpyDeviceToHost));
+      HIP_CALL(hipMemcpy(hostData, devData, n_points * sizeof(float),
+                           hipMemcpyDeviceToHost));
 
       /* Show result */
       // for(unsigned int i = 0; i < 10; i++) {
@@ -389,7 +389,7 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
       // printf("\n");
 
       /* Cleanup */
-      HIP_CALL(cudaFree(devData));
+      HIP_CALL(hipFree(devData));
       free(hostData);
       end_tot = std::chrono::high_resolution_clock::now();
       times_vec.push_back(end_tot - start_tot);
@@ -422,20 +422,20 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
       /* Allocate n floats on host */
       hostData = (Type *)calloc(n_points, sizeof(Type));
       /* Allocate n floats on device */
-      HIP_CALL(cudaMalloc((void **)&tempData, n_points * sizeof(Type)));
-      HIP_CALL(cudaMalloc((void **)&devData, n_points * sizeof(Type)));
+      HIP_CALL(hipMalloc((void **)&tempData, n_points * sizeof(Type)));
+      HIP_CALL(hipMalloc((void **)&devData, n_points * sizeof(Type)));
       start_kernel = std::chrono::high_resolution_clock::now();
       HIPRAND_CALL(hiprandGenerate(gen, tempData, n_points));
-      cudaDeviceSynchronize();
+      hipDeviceSynchronize();
       range_transform_int<Type>
           <<<nblocks, THREADS_PER_BLOCK>>>(n_points, tempData, devData, -1, 5);
-      cudaError_t status = cudaDeviceSynchronize();
+      hipError_t status = hipDeviceSynchronize();
       end_kernel = std::chrono::high_resolution_clock::now();
       kernel_times_vec.push_back(end_kernel - start_kernel);
 
       /* Copy device memory to host */
-      HIP_CALL(cudaMemcpy(hostData, devData, n_points * sizeof(float),
-                           cudaMemcpyDeviceToHost));
+      HIP_CALL(hipMemcpy(hostData, devData, n_points * sizeof(float),
+                           hipMemcpyDeviceToHost));
 
       /* Show result */
       // for(unsigned int i = 0; i < 10; i++) {
@@ -444,7 +444,7 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
       // printf("\n");
 
       /* Cleanup */
-      HIP_CALL(cudaFree(devData));
+      HIP_CALL(hipFree(devData));
       free(hostData);
       end_tot = std::chrono::high_resolution_clock::now();
       times_vec.push_back(end_tot - start_tot);
