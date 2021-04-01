@@ -1,13 +1,24 @@
 // This program uses the host hipRAND API.
 
-/*
+/* To compile:
+/opt/hipSYCL/rocm/hip/bin/hipcc \
+  --gcc-toolchain=`which gcc | sed "s/\/bin\/gcc$//"` \
+  --rocm-path=/opt/hipSYCL/rocm/hip \
+  --rocm-device-lib-path=/opt/hipSYCL/rocm/rocm-device-libs/amdgcn/bitcode \
+  -llibhiprand \
+  test_hiprand.cpp
+*/
+
+/* For complete test:
 rm timing_hiprand_tpb512.csv
 for size in 1 10 100 10000 100000 1000000 10000000 100000000; do \
-for name in "uniform_float" "uniform_double" "uniform_float_accurate" \
-"uniform_double_accurate" "gaussian_float" "gaussian_double" "lognormal_float" \
-"bits_int" "uniform_int" ; do \
-./test_hiprand_philox.exe 100 ${size} ${name} >> timing_hiprand_tpb512.csv; \
-done; \
+  for name in "uniform_float" "uniform_double" "uniform_float_accurate" \
+    "uniform_double_accurate" "gaussian_float" "gaussian_double" \
+    "lognormal_float" \
+    "bits_int" "uniform_int" ; do \
+      ./test_hiprand_philox.exe \
+        100 ${size} ${name} >> timing_hiprand_tpb512.csv; \
+  done; \
 done;
  */
 #include <hip_runtime.h>
@@ -98,7 +109,8 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
       hiprandGenerator_t gen;
       /* Create pseudo-random number generator */
 #ifdef USE_PHILOX
-      HIPRAND_CALL(hiprandCreateGenerator(&gen, HIPRAND_RNG_PSEUDO_PHILOX4_32_10));
+      HIPRAND_CALL(
+          hiprandCreateGenerator(&gen, HIPRAND_RNG_PSEUDO_PHILOX4_32_10));
 #elif defined USE_MRG
       HIPRAND_CALL(hiprandCreateGenerator(&gen, HIPRAND_RNG_PSEUDO_MRG32K3A));
 #else
@@ -127,7 +139,7 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
 
       /* Copy device memory to host */
       HIP_CALL(hipMemcpy(hostData, devData, n_points * sizeof(float),
-                           hipMemcpyDeviceToHost));
+                         hipMemcpyDeviceToHost));
 
       /* Show result */
       // for(unsigned int i = 0; i < 10; i++) {
@@ -151,7 +163,8 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
       hiprandGenerator_t gen;
       /* Create pseudo-random number generator */
 #ifdef USE_PHILOX
-      HIPRAND_CALL(hiprandCreateGenerator(&gen, HIPRAND_RNG_PSEUDO_PHILOX4_32_10));
+      HIPRAND_CALL(
+          hiprandCreateGenerator(&gen, HIPRAND_RNG_PSEUDO_PHILOX4_32_10));
 #elif defined USE_MRG
       HIPRAND_CALL(hiprandCreateGenerator(&gen, HIPRAND_RNG_PSEUDO_MRG32K3A));
 #else
@@ -180,7 +193,7 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
 
       /* Copy device memory to host */
       HIP_CALL(hipMemcpy(hostData, devData, n_points * sizeof(float),
-                           hipMemcpyDeviceToHost));
+                         hipMemcpyDeviceToHost));
 
       /* Show result */
       // for(unsigned int i = 0; i < 10; i++) {
@@ -204,7 +217,8 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
       hiprandGenerator_t gen;
       /* Create pseudo-random number generator */
 #ifdef USE_PHILOX
-      HIPRAND_CALL(hiprandCreateGenerator(&gen, HIPRAND_RNG_PSEUDO_PHILOX4_32_10));
+      HIPRAND_CALL(
+          hiprandCreateGenerator(&gen, HIPRAND_RNG_PSEUDO_PHILOX4_32_10));
 #elif defined USE_MRG
       HIPRAND_CALL(hiprandCreateGenerator(&gen, HIPRAND_RNG_PSEUDO_MRG32K3A));
 #else
@@ -230,7 +244,7 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
 
       /* Copy device memory to host */
       HIP_CALL(hipMemcpy(hostData, devData, n_points * sizeof(float),
-                           hipMemcpyDeviceToHost));
+                         hipMemcpyDeviceToHost));
 
       /* Show result */
       // for(unsigned int i = 0; i < 10; i++) {
@@ -254,7 +268,8 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
       hiprandGenerator_t gen;
       /* Create pseudo-random number generator */
 #ifdef USE_PHILOX
-      HIPRAND_CALL(hiprandCreateGenerator(&gen, HIPRAND_RNG_PSEUDO_PHILOX4_32_10));
+      HIPRAND_CALL(
+          hiprandCreateGenerator(&gen, HIPRAND_RNG_PSEUDO_PHILOX4_32_10));
 #elif defined USE_MRG
       HIPRAND_CALL(hiprandCreateGenerator(&gen, HIPRAND_RNG_PSEUDO_MRG32K3A));
 #else
@@ -272,7 +287,7 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
       HIP_CALL(hipMalloc((void **)&devData, n_points * sizeof(Type)));
       start_kernel = std::chrono::high_resolution_clock::now();
       HIPRAND_CALL(hiprandGenerateNormalDouble(gen, devData, n_points,
-                                             GAUSSIAN_ARGS_DOUBLE));
+                                               GAUSSIAN_ARGS_DOUBLE));
       // hipDeviceSynchronize();
       hipError_t status = hipDeviceSynchronize();
       end_kernel = std::chrono::high_resolution_clock::now();
@@ -280,7 +295,7 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
 
       /* Copy device memory to host */
       HIP_CALL(hipMemcpy(hostData, devData, n_points * sizeof(float),
-                           hipMemcpyDeviceToHost));
+                         hipMemcpyDeviceToHost));
 
       /* Show result */
       // for(unsigned int i = 0; i < 10; i++) {
@@ -304,7 +319,8 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
       hiprandGenerator_t gen;
       /* Create pseudo-random number generator */
 #ifdef USE_PHILOX
-      HIPRAND_CALL(hiprandCreateGenerator(&gen, HIPRAND_RNG_PSEUDO_PHILOX4_32_10));
+      HIPRAND_CALL(
+          hiprandCreateGenerator(&gen, HIPRAND_RNG_PSEUDO_PHILOX4_32_10));
 #elif defined USE_MRG
       HIPRAND_CALL(hiprandCreateGenerator(&gen, HIPRAND_RNG_PSEUDO_MRG32K3A));
 #else
@@ -323,7 +339,8 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
       /* Allocate n floats on device */
       HIP_CALL(hipMalloc((void **)&devData, n_points * sizeof(Type)));
       start_kernel = std::chrono::high_resolution_clock::now();
-      HIPRAND_CALL(hiprandGenerateLogNormal(gen, devData, n_points, 0.0f, 1.0f));
+      HIPRAND_CALL(
+          hiprandGenerateLogNormal(gen, devData, n_points, 0.0f, 1.0f));
       range_transform<Type>
           <<<nblocks, THREADS_PER_BLOCK>>>(n_points, devData, -1.0f, 5.0f);
       hipError_t status = hipDeviceSynchronize();
@@ -332,7 +349,7 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
 
       /* Copy device memory to host */
       HIP_CALL(hipMemcpy(hostData, devData, n_points * sizeof(float),
-                           hipMemcpyDeviceToHost));
+                         hipMemcpyDeviceToHost));
 
       /* Show result */
       // for(unsigned int i = 0; i < 10; i++) {
@@ -356,7 +373,8 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
       hiprandGenerator_t gen;
       /* Create pseudo-random number generator */
 #ifdef USE_PHILOX
-      HIPRAND_CALL(hiprandCreateGenerator(&gen, HIPRAND_RNG_PSEUDO_PHILOX4_32_10));
+      HIPRAND_CALL(
+          hiprandCreateGenerator(&gen, HIPRAND_RNG_PSEUDO_PHILOX4_32_10));
 #elif defined USE_MRG
       HIPRAND_CALL(hiprandCreateGenerator(&gen, HIPRAND_RNG_PSEUDO_MRG32K3A));
 #else
@@ -380,7 +398,7 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
 
       /* Copy device memory to host */
       HIP_CALL(hipMemcpy(hostData, devData, n_points * sizeof(float),
-                           hipMemcpyDeviceToHost));
+                         hipMemcpyDeviceToHost));
 
       /* Show result */
       // for(unsigned int i = 0; i < 10; i++) {
@@ -404,7 +422,8 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
       hiprandGenerator_t gen;
       /* Create pseudo-random number generator */
 #ifdef USE_PHILOX
-      HIPRAND_CALL(hiprandCreateGenerator(&gen, HIPRAND_RNG_PSEUDO_PHILOX4_32_10));
+      HIPRAND_CALL(
+          hiprandCreateGenerator(&gen, HIPRAND_RNG_PSEUDO_PHILOX4_32_10));
 #elif defined USE_MRG
       HIPRAND_CALL(hiprandCreateGenerator(&gen, HIPRAND_RNG_PSEUDO_MRG32K3A));
 #else
@@ -435,7 +454,7 @@ int generate(size_t n_iters, size_t n_points, std::string name = "") {
 
       /* Copy device memory to host */
       HIP_CALL(hipMemcpy(hostData, devData, n_points * sizeof(float),
-                           hipMemcpyDeviceToHost));
+                         hipMemcpyDeviceToHost));
 
       /* Show result */
       // for(unsigned int i = 0; i < 10; i++) {
