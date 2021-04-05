@@ -119,7 +119,7 @@ static inline cl::sycl::device GetTargetDevice() {
     dev = cl::sycl::device(cuda_selector);
   } catch (...) {
   }
-#elif SYCL_TARGET_HIP
+#elif defined SYCL_TARGET_HIP
   AMDSelector amd_selector;
   try {
     dev = cl::sycl::device(amd_selector);
@@ -265,10 +265,14 @@ int main(int argc, char** argv) {
 
   // Choose device to run on and create queue
   cl::sycl::device dev = GetTargetDevice();
+#ifdef SYCL_TARGET_HIP
+  cl::sycl::queue queue(dev);
+#else
   cl::sycl::queue queue(dev, exception_handler);
+#endif
   std::string device_name = 
     queue.get_device().get_info<cl::sycl::info::device::name>();
-    // std::cout << "dev_name: " << device_name << std::endl;
+    std::cout << "dev_name: " << device_name << std::endl;
   
   // Initialize output file
   std::string device_type;
@@ -276,6 +280,8 @@ int main(int argc, char** argv) {
     device_type = "cpu";
   } else if (std::string(argv[0]).find("gpu") != std::string::npos) {
     device_type = "gpu";
+  } else if (std::string(argv[0]).find("hip") != std::string::npos) {
+    device_type = "hip";
   } else if (std::string(argv[0]).find("curand") != std::string::npos) {
     device_type = "curand";
   } else {
@@ -283,11 +289,11 @@ int main(int argc, char** argv) {
     return 0;
   }
 
-  #ifdef USE_PHILOX
+#ifdef USE_PHILOX
   using engine = oneapi::mkl::rng::philox4x32x10;
-  #elif defined USE_MRG
+#elif defined USE_MRG
   using engine = oneapi::mkl::rng::mrg32k3a;
-  #endif
+#endif
 
   if (name == "uniform_float") {
     std::string name = "uniform_float";
