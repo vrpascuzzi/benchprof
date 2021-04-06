@@ -28,7 +28,18 @@ declare -a DISTS=("uniform_float" "uniform_double" "gaussian_float" \
 
 BACKEND=${1}
 
-if [ "${BACKEND}" = "intelcpu" ]; then
+if [ "${BACKEND}" = "host" ]; then
+    OUTCSV_BUFFER_PHILOX="${OUTDIR}/clock_mkl_rng_host_buffer_philox.csv"
+    OUTCSV_USM_PHILOX="${OUTDIR}/clock_mkl_rng_host_usm_philox.csv"
+    EXE_BUFFER_PHILOX=${BLDDIR}/test_mkl_rng_host_buffer_philox.exe
+    EXE_USM_PHILOX=${BLDDIR}/test_mkl_rng_host_usm_philox.exe
+
+    OUTCSV_BUFFER_MRG="${OUTDIR}/clock_mkl_rng_host_buffer_mrg.csv"
+    OUTCSV_USM_MRG="${OUTDIR}/clock_mkl_rng_host_usm_mrg.csv"
+    EXE_BUFFER_MRG=${BLDDIR}/test_mkl_rng_host_buffer_mrg.exe
+    EXE_USM_MRG=${BLDDIR}/test_mkl_rng_host_usm_mrg.exe
+
+elif [ "${BACKEND}" = "intelcpu" ]; then
     OUTCSV_BUFFER_PHILOX="${OUTDIR}/clock_mkl_rng_cpu_buffer_philox.csv"
     OUTCSV_USM_PHILOX="${OUTDIR}/clock_mkl_rng_cpu_usm_philox.csv"
     EXE_BUFFER_PHILOX=${BLDDIR}/test_mkl_rng_cpu_buffer_philox.exe
@@ -109,7 +120,7 @@ if [ ! -z ${EXE_BUFFER_MRG} ]; then
         echo "Batch size: ${size}"
         for name in ${DISTS[@]}; do
             echo "  Distribution: ${name}"
-             ${EXE_BUFFER_MRG} 100 ${size} ${name} >> ${OUTCSV_BUFFER_MRG};
+            ${EXE_BUFFER_MRG} 100 ${size} ${name} >> ${OUTCSV_BUFFER_MRG};
         done;
     done;
 fi
@@ -123,7 +134,7 @@ if [ ! -z ${EXE_USM_PHILOX} ]; then
         echo "Batch size: ${size}"
         for name in ${DISTS[@]}; do
             echo "  Distribution: ${name}"
-             ${EXE_USM_PHILOX} 100 ${size} ${name} >> ${OUTCSV_USM_PHILOX};
+            ${EXE_USM_PHILOX} 100 ${size} ${name} >> ${OUTCSV_USM_PHILOX};
         done;
     done;
 fi
@@ -136,7 +147,7 @@ if [ ! -z ${EXE_USM_MRG} ]; then
         echo "Batch size: ${size}"
         for name in ${DISTS[@]}; do
             echo "  Distribution: ${name}"    
-             ${EXE_USM_MRG} 100 ${size} ${name} >> ${OUTCSV_USM_MRG};
+            ${EXE_USM_MRG} 100 ${size} ${name} >> ${OUTCSV_USM_MRG};
         done;
     done;
 fi

@@ -276,7 +276,9 @@ int main(int argc, char** argv) {
   
   // Initialize output file
   std::string device_type;
-  if (std::string(argv[0]).find("cpu") != std::string::npos) {
+  if (std::string(argv[0]).find("host") != std::string::npos) {
+    device_type = "host";
+  } else if (std::string(argv[0]).find("cpu") != std::string::npos) {
     device_type = "cpu";
   } else if (std::string(argv[0]).find("gpu") != std::string::npos) {
     device_type = "gpu";

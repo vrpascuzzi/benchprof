@@ -18,7 +18,40 @@ export SRCDIR=${BENCHPROF_ROOT}/onemkl/src
 BACKEND=${1}
 
 # intelcpu
-if [ "${BACKEND}" = "intelcpu" ]; then
+if [ "${BACKEND}" = "host" ]; then
+    EXE_BUFFER_PHILOX=${BLDDIR}/test_mkl_rng_host_buffer_philox.exe
+    EXE_USM_PHILOX=${BLDDIR}/test_mkl_rng_host_usm_philox.exe
+    EXE_BUFFER_MRG=${BLDDIR}/test_mkl_rng_host_buffer_mrg.exe
+    EXE_USM_MRG=${BLDDIR}/test_mkl_rng_host_usm_mrg.exe
+    clang++ \
+        -fsycl \
+        -lonemkl \
+        -DUSE_PHILOX=ON \
+        ${SRCDIR}/test_mkl_rng.cc \
+        -o ${EXE_BUFFER_PHILOX} &&
+    clang++ \
+        -fsycl \
+        -lonemkl \
+        -DUSE_PHILOX=ON \
+        -DSYCL_USE_USM=ON \
+        ${SRCDIR}/test_mkl_rng.cc \
+        -o ${EXE_USM_PHILOX}
+    clang++ \
+        -fsycl \
+        -lonemkl \
+        -DUSE_MRG=ON \
+        ${SRCDIR}/test_mkl_rng.cc \
+        -o ${EXE_BUFFER_MRG} &&
+    clang++ \
+        -fsycl \
+        -lonemkl \
+        -DUSE_MRG=ON \
+        -DSYCL_USE_USM=ON \
+        ${SRCDIR}/test_mkl_rng.cc \
+        -o ${EXE_USM_MRG}
+
+# intelcpu
+elif [ "${BACKEND}" = "intelcpu" ]; then
     EXE_BUFFER_PHILOX=${BLDDIR}/test_mkl_rng_cpu_buffer_philox.exe
     EXE_USM_PHILOX=${BLDDIR}/test_mkl_rng_cpu_usm_philox.exe
     EXE_BUFFER_MRG=${BLDDIR}/test_mkl_rng_cpu_buffer_mrg.exe
@@ -203,6 +236,6 @@ elif [ "${BACKEND}" = "hiprand" ]; then
         ${SRCDIR}/test_hiprand.cpp
 else
     echo "unknown backend ${BACKEND}\n"
-    echo "arg must be: intelcpu, intelgpu, mkl_curand, mkl_hiprand, curand, hiprand"
+    echo "arg must be: host, intelcpu, intelgpu, mkl_curand, mkl_hiprand, curand, hiprand"
     exit 0
 fi
