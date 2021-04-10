@@ -237,5 +237,5 @@ elif [ "${BACKEND}" = "hiprand" ]; then
 else
     echo "unknown backend ${BACKEND}\n"
     echo "arg must be: host, intelcpu, intelgpu, mkl_curand, mkl_hiprand, curand, hiprand"
-    exit 0
+    return
 fi
